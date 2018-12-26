@@ -1,0 +1,14 @@
+{
+    "providers": {
+        "awscloudformation": {
+            "AuthRoleName": "estpp-20181122183400-authRole",
+            "UnauthRoleArn": "arn:aws:iam::179885036680:role/estpp-20181122183400-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::179885036680:role/estpp-20181122183400-authRole",
+            "Region": "us-west-2",
+            "DeploymentBucketName": "estpp-20181122183400-deployment",
+            "UnauthRoleName": "estpp-20181122183400-unauthRole",
+            "StackName": "estpp-20181122183400",
+            "StackId": "arn:aws:cloudformation:us-west-2:179885036680:stack/estpp-20181122183400/3c698ba0-eec8-11e8-944c-500c32c86c8d"
+        }
+    }
+}

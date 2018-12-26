@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_search"
+        android:icon="@drawable/ic_search_24px"
+        android:title="Search" />
+    <item
+        android:id="@+id/navigation_about_me"
+        android:icon="@drawable/ic_person_24px"
+        android:title="About Me" />
+    <item
+        android:id="@+id/navigation_notifications"
+        android:icon="@drawable/ic_notifications_24px"
+        android:title="Notifications" />
+</menu>
