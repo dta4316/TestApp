@@ -23,7 +23,6 @@ public class SignupActivity extends AuthenticationBaseActivity {
     private static final String TAG = "SignupActivity";
 
     @BindView(R.id.txtName) EditText txtName;
-    @BindView(R.id.txtAddress) EditText txtAddress;
     @BindView(R.id.txtEmail) EditText txtEmail;
     @BindView(R.id.txtMobile) EditText txtMobile;
     @BindView(R.id.txtPassword) EditText txtPassword;
@@ -69,12 +68,11 @@ public class SignupActivity extends AuthenticationBaseActivity {
         progressDialog.setMessage("Creating Account...");
         progressDialog.show();
 
-        String name = "Meow Tan";//txtName.getText().toString();
-        String address = "254 Nadine ST";//txtAddress.getText().toString();
-        String email = "dta4316@gmail.com";//txtEmail.getText().toString();
-        String mobile = "+12092295232";//txtMobile.getText().toString();
-        String password = "11111111";//txtPassword.getText().toString();
-        String reEnterPassword = "11111111";//txtReenterPassword.getText().toString();
+        String name = txtName.getText().toString();
+        String email = txtEmail.getText().toString();
+        String mobile = txtMobile.getText().toString();
+        String password = txtPassword.getText().toString();
+        String reEnterPassword = txtReenterPassword.getText().toString();
 
         CognitoUserAttributes userAttributes = new CognitoUserAttributes();
         userAttributes.addAttribute("given_name", name);

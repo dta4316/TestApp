@@ -148,8 +148,8 @@ public class MainActivity extends AppCompatActivity implements AboutMeFragment.O
 
     @Override
     public void OnAboutMeFragmentSignedOut() {
-        m_BottomNavigationView.setSelectedItemId(R.id.navigation_search);
         Login();
+        m_BottomNavigationView.setSelectedItemId(R.id.navigation_search);
     }
 
     private static class CheckIsSignedInTask extends AsyncTask<String, Void, Boolean> {

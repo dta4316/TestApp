@@ -20,6 +20,11 @@ public class Constants {
     final static public String DISTANCE_MILE_POSTFIX = "miles";
 
 
+    final static public String COOGNITO_USER_NOT_CONFIRMED = "UserNotConfirmedException";
+
+
+
+
 
 
 

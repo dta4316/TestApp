@@ -12,20 +12,27 @@ import android.widget.Toast;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.AuthenticationDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
+
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import dta4316.testapp.Common.Authentication;
+import dta4316.testapp.Common.Constants;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
+    private ProgressDialog m_ProgressDialog;
 
     @BindView(R.id.txtEmail) EditText txtEmail;
     @BindView(R.id.txtPassword) EditText txtPassword;
@@ -39,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+        m_ProgressDialog = new ProgressDialog(LoginActivity.this, R.style.AppTheme_Dark_Dialog);
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -69,11 +77,9 @@ public class LoginActivity extends AppCompatActivity {
 
     public void login() {
         btnLogin.setEnabled(false);
-
-        final ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this, R.style.AppTheme_Dark_Dialog);
-        progressDialog.setIndeterminate(true);
-        progressDialog.setMessage("Authenticating...");
-        progressDialog.show();
+        m_ProgressDialog.setIndeterminate(true);
+        m_ProgressDialog.setMessage("Authenticating...");
+        m_ProgressDialog.show();
 
         String userName = txtEmail.getText().toString();
         String password = txtPassword.getText().toString();
@@ -82,11 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
             @Override
             public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
-                btnLogin.setEnabled(true);
-                progressDialog.dismiss();
-                Authentication.SignIn();
-                finish();
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+                LoginSucceed();
             }
 
             @Override
@@ -115,15 +117,65 @@ public class LoginActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Exception exception) {
-                Authentication.SignOut();
-                progressDialog.dismiss();
-                String errorMessage = exception instanceof AmazonServiceException ? ((AmazonServiceException)exception).getErrorMessage() : exception.getMessage();
-                Toast.makeText(getBaseContext(), "Login failed: " + errorMessage, Toast.LENGTH_LONG).show();
-                btnLogin.setEnabled(true);
+                if(exception instanceof AmazonServiceException && ((AmazonServiceException)exception).getErrorCode().equals(Constants.COOGNITO_USER_NOT_CONFIRMED)){
+                    VerifyAccount();
+                }
+                else {
+                    LoginFailed(exception);
+                }
             }
         };
 
-        Authentication.GetCurrentUser().getSessionInBackground(authenticationHandler);
+        Authentication.GetUser(userName).getSessionInBackground(authenticationHandler);
+    }
+
+    private void LoginFailed(Exception exception){
+        Authentication.SignOut();
+        m_ProgressDialog.dismiss();
+        String errorMessage = exception instanceof AmazonServiceException ? ((AmazonServiceException)exception).getErrorMessage() : exception.getMessage();
+        Toast.makeText(getBaseContext(), "Login failed: " + errorMessage, Toast.LENGTH_LONG).show();
+        btnLogin.setEnabled(true);
+    }
+
+    private void LoginSucceed(){
+        btnLogin.setEnabled(true);
+        m_ProgressDialog.dismiss();
+        Authentication.SignIn();
+        finish();
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+    }
+
+    private void VerifyAccount() {
+        String userName = txtEmail.getText().toString();
+        Intent intent = new Intent(getBaseContext(), SignupVerificationActivity.class);
+        intent.putExtra("SIGNUP_VERIFICATION_USER_ID", userName);
+        startActivityForResult(intent, 0);
+        finish();
+        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+    }
+
+    private void ConfirmUserLogin(){
+        GetDetailsHandler GetDetailsCallback = new GetDetailsHandler(){
+            @Override
+            public void onSuccess(CognitoUserDetails cognitoUserDetails) {
+                CognitoUserAttributes cognitoUserAttributes = cognitoUserDetails.getAttributes();
+
+                Map<String, String> attributes = cognitoUserAttributes.getAttributes();
+                Boolean emailVerified = attributes.get("email_verified").toLowerCase().equals("true")? true: false;
+                if(emailVerified) {
+                    LoginSucceed();
+                }
+                else {
+                    VerifyAccount();
+                }
+            }
+
+            @Override
+            public void onFailure(Exception exception) {
+                LoginFailed(exception);
+            }
+        };
+        Authentication.GetCurrentUser().getDetailsInBackground(GetDetailsCallback);
     }
 
     @Override

@@ -66,11 +66,17 @@ public class SignupVerificationActivity extends AuthenticationBaseActivity {
         GenericHandler confirmationCallback = new GenericHandler() {
             @Override
             public void onSuccess() {
+                btnVerifyAccount.setEnabled(true);
+                linkResendVerification.setEnabled(true);
+                progressDialog.dismiss();
                 finish();
             }
 
             @Override
             public void onFailure(Exception exception) {
+                progressDialog.dismiss();
+                btnVerifyAccount.setEnabled(true);
+                linkResendVerification.setEnabled(true);
                 Toast.makeText(getBaseContext(), "Account verification failed: " + ((AmazonServiceException)exception).getErrorMessage(), Toast.LENGTH_LONG).show();
             }
         };
